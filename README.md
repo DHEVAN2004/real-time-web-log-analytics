@@ -5,7 +5,7 @@ A desktop observability dashboard for the preprocessed Kaggle web-server access 
 ## Current Implementation
 
 - Streaming preprocessing script: `preprocess_access_log.py`
-- Compressed normalized dataset: `access_preprocessed.csv.gz`
+- Locally generated compressed dataset: `access_preprocessed.csv.gz`
 - FastAPI analytics backend under `backend/app`
 - JavaFX desktop dashboard under `desktop`
 - MySQL schema and analytics queries under `database`
@@ -13,7 +13,7 @@ A desktop observability dashboard for the preprocessed Kaggle web-server access 
 
 The raw `access.log` and generated `access_preprocessed.csv.gz` are not included in this repository; the compressed dataset exceeds GitHub's 100 MB per-file limit. To run dataset-dependent features, place an access log at the project root and run `python preprocess_access_log.py` to generate the compressed dataset locally. Local databases, virtual environments, and build output are also excluded.
 
-The application replays the real preprocessed dataset, publishes events to Kafka, processes the Kafka topic with Spark, and reads indexed logs and alerts from MySQL. Service status in the desktop sidebar is read from live backend health checks.
+When the preprocessed dataset is available locally, the application can replay it, publish events to Kafka, process the topic with Spark, and read indexed logs and alerts from MySQL. Service status in the desktop sidebar is read from live backend health checks.
 
 ## Prerequisites
 
@@ -52,7 +52,7 @@ mvn javafx:run
 
 MySQL connection settings, Kafka bootstrap servers/topic, Spark installation/version, and backend settings can be overridden with environment variables or `backend\.env` (copy `.env.example` and enter the local database password). The desktop status view shows live backend, dataset, Kafka, Spark, and MySQL health. Spark is optional; when `SPARK_HOME` is configured, the backend starts a Spark Structured Streaming consumer and reports startup or processing failures rather than marking it healthy just because its configuration exists.
 
-The Dashboard and Analytics views use the exact full-dataset aggregate file, while log search reads the existing indexed database records. The Live Monitoring view is explicitly a paced replay of historical data; it is not a live production access-log tail. New live events can be validated and persisted through `POST /api/ingest/log`. Incoming events are fingerprinted for duplicate protection and include source, request, and ingestion metadata. Latency analytics remain unavailable unless the source contains real response-time measurements.
+The Dashboard and Analytics views use the full-dataset aggregate file, while log search reads indexed records from the local database. The Live Monitoring view is explicitly a paced replay of historical data; it is not a live production access-log tail. New live events can be validated and persisted through `POST /api/ingest/log`. Incoming events are fingerprinted for duplicate protection and include source, request, and ingestion metadata. Latency analytics remain unavailable unless the source contains real response-time measurements.
 
 ## API Endpoints
 
@@ -87,7 +87,7 @@ cd ..\desktop
 mvn -q -DskipTests package
 ```
 
-Database startup migrations are additive and do not truncate or reload existing tables. The current checked-in dataset index contains 10,365,077 historical requests in aggregates and 100,000 indexed records for log search. Do not run `scripts\build_full_dataset_index.py` against an existing production database without first reviewing its import behavior and taking a backup.
+Database startup migrations are additive and do not truncate or reload existing tables. The checked-in aggregate file summarizes 10,365,077 historical requests; the 100,000 indexed log records are in the local database, which is not included. Do not run `scripts\build_full_dataset_index.py` against an existing production database without first reviewing its import behavior and taking a backup.
 
 ## Project Structure
 
