@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.weblogmonitor.DashboardController">
+    <left>
+        <VBox styleClass="sidebar" spacing="18">
+            <VBox spacing="4"><Label text="REAL-TIME" styleClass="brand-kicker"/><Label text="WEB LOG ANALYTICS" styleClass="brand-title"/><Label text="Monitoring &amp; Observability" styleClass="brand-subtitle"/></VBox>
+            <Separator/>
+            <VBox spacing="8">
+                <Button text="Dashboard" onAction="#showDashboard" styleClass="nav-button,nav-active"/>
+                <Button text="Live Monitoring" onAction="#showLiveMonitoring" styleClass="nav-button"/>
+                <Button text="Analytics" onAction="#showAnalytics" styleClass="nav-button"/>
+                <Button text="Log Explorer" onAction="#showLogExplorer" styleClass="nav-button"/>
+                <Button text="Alerts" onAction="#showAlerts" styleClass="nav-button"/>
+                <Button text="System Status" onAction="#showSystemStatus" styleClass="nav-button"/>
+            </VBox>
+            <Region VBox.vgrow="ALWAYS"/>
+            <VBox spacing="8" styleClass="service-list">
+                <Label text="SERVICES" styleClass="section-label"/>
+                <Label fx:id="backendServiceStatus" text="●  Backend API" styleClass="status-muted"/>
+                <Label fx:id="datasetServiceStatus" text="●  Dataset pipeline" styleClass="status-muted"/>
+                <Label fx:id="kafkaServiceStatus" text="●  Kafka" styleClass="status-muted"/>
+                <Label fx:id="sparkServiceStatus" text="●  Spark" styleClass="status-muted"/>
+                <Label fx:id="mysqlServiceStatus" text="●  MySQL" styleClass="status-muted"/>
+            </VBox>
+        </VBox>
+    </left>
+    <top>
+        <HBox styleClass="topbar" alignment="CENTER_LEFT" spacing="16"><Label fx:id="pageTitle" text="Dashboard" styleClass="page-title"/><Region HBox.hgrow="ALWAYS"/><Label fx:id="connectionStatus" text="● Connecting" styleClass="status-muted"/><Label fx:id="lastUpdated" text="Waiting for data" styleClass="muted-text"/><Button text="Refresh" onAction="#refresh" styleClass="outline-button"/></HBox>
+    </top>
+    <center>
+        <ScrollPane fitToWidth="true" styleClass="content-scroll"><VBox fx:id="content" spacing="22" styleClass="content-area">
+            <GridPane hgap="14" vgap="14">
+                <columnConstraints><ColumnConstraints hgrow="ALWAYS" minWidth="0"/><ColumnConstraints hgrow="ALWAYS" minWidth="0"/><ColumnConstraints hgrow="ALWAYS" minWidth="0"/><ColumnConstraints hgrow="ALWAYS" minWidth="0"/><ColumnConstraints hgrow="ALWAYS" minWidth="0"/><ColumnConstraints hgrow="ALWAYS" minWidth="0"/></columnConstraints>
+                <VBox GridPane.columnIndex="0" styleClass="metric-card"><Label text="TOTAL REQUESTS" styleClass="metric-label"/><Label fx:id="totalRequests" text="--" styleClass="metric-value"/><Label text="Across the dataset" styleClass="metric-detail"/></VBox>
+                <VBox GridPane.columnIndex="1" styleClass="metric-card"><Label text="REQUESTS / SEC" styleClass="metric-label"/><Label fx:id="requestsPerSecond" text="--" styleClass="metric-value cyan"/><Label text="Aggregate view" styleClass="metric-detail"/></VBox>
+                <VBox GridPane.columnIndex="2" styleClass="metric-card"><Label text="SUCCESSFUL" styleClass="metric-label"/><Label fx:id="successRequests" text="--" styleClass="metric-value green"/><Label text="2xx responses" styleClass="metric-detail"/></VBox>
+                <VBox GridPane.columnIndex="3" styleClass="metric-card"><Label text="4XX ERRORS" styleClass="metric-label"/><Label fx:id="clientErrors" text="--" styleClass="metric-value amber"/><Label text="Client-side errors" styleClass="metric-detail"/></VBox>
+                <VBox GridPane.columnIndex="4" styleClass="metric-card"><Label text="5XX ERRORS" styleClass="metric-label"/><Label fx:id="serverErrors" text="--" styleClass="metric-value red"/><Label text="Server-side errors" styleClass="metric-detail"/></VBox>
+                <VBox GridPane.columnIndex="5" styleClass="metric-card"><Label text="ACTIVE ALERTS" styleClass="metric-label"/><Label fx:id="activeAlerts" text="--" styleClass="metric-value red"/><Label text="Rule-based signals" styleClass="metric-detail"/></VBox>
+            </GridPane>
+            <HBox spacing="14"><VBox HBox.hgrow="ALWAYS" styleClass="panel"><Label text="Recent request activity" styleClass="panel-title"/><Label text="The latest records from the preprocessed dataset" styleClass="muted-text"/><TableView fx:id="logTable" VBox.vgrow="ALWAYS" prefHeight="460"><columns><TableColumn fx:id="timeColumn" text="Timestamp" prefWidth="170"/><TableColumn fx:id="ipColumn" text="IP address" prefWidth="120"/><TableColumn fx:id="methodColumn" text="Method" prefWidth="80"/><TableColumn fx:id="urlColumn" text="URL" prefWidth="450"/><TableColumn fx:id="statusColumn" text="Status" prefWidth="75"/><TableColumn fx:id="bytesColumn" text="Bytes" prefWidth="100"/></columns><placeholder><Label text="No log records available"/></placeholder></TableView></VBox></HBox>
+        </VBox></ScrollPane>
+    </center>
+</BorderPane>

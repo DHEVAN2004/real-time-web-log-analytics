@@ -1,0 +1,24 @@
+# Python environments and generated files
+.venv/
+.venv-*/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Local configuration
+.env
+.env.*
+!.env.example
+
+# Local datasets and database
+/access.log
+/access_preprocessed.csv.gz
+/data/*.db
+
+# Generated service logs and build output
+*.log
+/desktop/target/
+
+# Local GitHub upgrade tooling metadata
+/.github/java-upgrade/
+/.github/modernize/
