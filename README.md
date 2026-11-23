@@ -21,7 +21,8 @@ When the preprocessed dataset is available locally, the application can replay i
 - Java 17+
 - Maven 3.9+
 - MySQL 8+
-- Apache Spark 4.2.0 (set `SPARK_HOME` if it is not installed at `C:\spark`)
+- Apache Spark 4.2.0 (the launcher checks `C:\spark` and an installed PySpark package; otherwise set `SPARK_HOME`)
+- On Windows, Hadoop native utilities for Spark (`winutils.exe` and `hadoop.dll` under `%HADOOP_HOME%\bin`)
 - Internet access on first launch to download the Apache Kafka 4.1.1 distribution and Spark's Kafka connector
 
 ## Run The Application

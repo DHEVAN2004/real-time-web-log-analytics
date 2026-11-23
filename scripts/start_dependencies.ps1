@@ -12,10 +12,16 @@ New-Item -ItemType Directory -Force -Path $serviceRoot | Out-Null
 
 $mysqlService = Get-Service -Name "MySQL80" -ErrorAction SilentlyContinue
 if (-not $mysqlService) {
-    throw "MySQL80 is not installed. Install MySQL 8 and configure the backend connection before starting the application."
+    $mysqlService = Get-Service -ErrorAction SilentlyContinue |
+        Where-Object { $_.Name -match "^MySQL\d+$" } |
+        Sort-Object Name |
+        Select-Object -First 1
+}
+if (-not $mysqlService) {
+    throw "A MySQL 8 Windows service was not found. Install MySQL 8 and configure the backend connection before starting the application."
 }
 if ($mysqlService.Status -ne "Running") {
-    Start-Service -Name "MySQL80"
+    Start-Service -Name $mysqlService.Name
 }
 
 $mysqlReady = $false
@@ -128,9 +134,34 @@ if (-not $env:SPARK_HOME -and (Test-Path "C:\spark\bin\spark-submit.cmd")) {
 if (-not $env:SPARK_VERSION) {
     $env:SPARK_VERSION = "4.2.0"
 }
+if (-not $env:SPARK_HOME) {
+    $pythonCommand = Get-Command python.exe -ErrorAction SilentlyContinue
+    if ($pythonCommand) {
+        $detectedSparkHome = & $pythonCommand.Source -c "import pathlib, pyspark; print(pathlib.Path(pyspark.__file__).parent)" 2>$null
+        if ($LASTEXITCODE -eq 0 -and $detectedSparkHome) {
+            $env:SPARK_HOME = ($detectedSparkHome | Select-Object -Last 1).Trim()
+        }
+    }
+}
+if (-not $env:HADOOP_HOME) {
+    $localHadoopHome = Join-Path $serviceRoot "hadoop-3.3.6"
+    if (Test-Path (Join-Path $localHadoopHome "bin\winutils.exe")) {
+        $env:HADOOP_HOME = $localHadoopHome
+    }
+}
+if ($env:HADOOP_HOME) {
+    $hadoopBin = Join-Path $env:HADOOP_HOME "bin"
+    if (Test-Path $hadoopBin) {
+        $env:PATH = "$hadoopBin;$env:PATH"
+    }
+}
 if (-not $env:SPARK_HOME -or -not (Test-Path (Join-Path $env:SPARK_HOME "bin\spark-submit.cmd"))) {
     $sparkReady = $false
     Write-Warning "Spark is not installed/configured; the core dashboard, MySQL, and Kafka remain available."
+} elseif ($env:OS -eq "Windows_NT" -and
+    (-not $env:HADOOP_HOME -or -not (Test-Path (Join-Path $env:HADOOP_HOME "bin\winutils.exe")))) {
+    $sparkReady = $false
+    Write-Warning "Spark on Windows requires winutils.exe under HADOOP_HOME\bin."
 } else {
     $sparkReady = $true
 }
